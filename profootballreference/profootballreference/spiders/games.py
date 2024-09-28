@@ -38,6 +38,7 @@ class GamesSpider(scrapy.Spider):
                 callback=self.parse_game,
                 meta={'year': year, 'week': week},
             )
+            break
 
     def parse_game(self, response):
         self.parse_scorebox(response)
