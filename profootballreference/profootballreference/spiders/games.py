@@ -44,8 +44,6 @@ class GamesSpider(scrapy.Spider):
         self.activate_csvs(response)
         self.parse_csvs(response)
 
-        pass
-
     def parse_scorebox(self, response):
         driver = response.meta['driver']
         s = Selector(text=driver.page_source)
@@ -143,7 +141,7 @@ class GamesSpider(scrapy.Spider):
             # Most tables have this as the first row for some reason
             csv_content = [row for row in csv_content if row!=['']]
 
-            item = CsvFileItem(table_name=table_name, csv_content=csv_content)
+            item = CsvFileItem(game_id=game_id, table_name=table_name, csv_content=csv_content)
 
             yield item
         
