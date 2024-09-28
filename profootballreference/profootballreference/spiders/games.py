@@ -3,7 +3,7 @@ from scrapy_selenium import SeleniumRequest
 from selenium.webdriver.common.by import By
 from scrapy.selector import Selector
 from selenium.webdriver.common.action_chains import ActionChains
-from ..items import CsvFileItem, CsvItem, MetaItem
+from ..items import CsvFileItem, MetaItem
 
 
 # TODO: add logic here to check file system for game CSVs and skip if they exist

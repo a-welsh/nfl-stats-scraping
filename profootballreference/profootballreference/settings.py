@@ -103,5 +103,6 @@ SELENIUM_DRIVER_ARGUMENTS = ['--headless']  # '--headless' if using chrome inste
 
 # Needed for CSV pipeline
 ITEM_PIPELINES = {
-    'profootballreference.pipelines.CsvPipeline': 300,
+    'profootballreference.pipelines.MetaPipeline': 300,
+    'profootballreference.pipelines.CsvFilePipeline': 400,
 }
