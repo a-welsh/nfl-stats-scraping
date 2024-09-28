@@ -5,6 +5,11 @@ from scrapy.selector import Selector
 from selenium.webdriver.common.action_chains import ActionChains
 from ..items import CsvFileItem, CsvItem, MetaItem
 
+
+# TODO: add logic here to check file system for game CSVs and skip if they exist
+# This will require some thought around folder structure... if there's one folder per game that would help,
+# but might make parsing downstream more difficult
+
 class GamesSpider(scrapy.Spider):
     name = 'games'
     allowed_domains = ['www.pro-football-reference.com']
@@ -35,10 +40,52 @@ class GamesSpider(scrapy.Spider):
             )
 
     def parse_game(self, response):
+        self.parse_scorebox(response)
         self.activate_csvs(response)
         self.parse_csvs(response)
 
         pass
+
+    def parse_scorebox(self, response):
+        driver = response.meta['driver']
+        s = Selector(text=driver.page_source)
+
+        # Get scorebox info, team names
+        scorebox = s.xpath('//div[@class="scorebox"]')
+        away_div = s.xpath('//div[@class="scorebox"]/div[1]/descendant::strong/a')
+        home_div = s.xpath('//div[@class="scorebox"]/div[2]/descendant::strong/a')
+        away_code = away_div.xpath('@href').get().split('/')[1]
+        home_code = home_div.xpath('@href').get().split('/')[1]
+        away_full_name = away_div.xpath('text()').get()
+        home_full_name = home_div.xpath('text()').get()
+        away_name = away_full_name.split(' ')[-1]
+        home_name = home_full_name.split(' ')[-1]
+        away_coach = s.xpath('//div[@class="scorebox"]/div[1]/descendant::strong[text()="Coach"]/following-sibling::a/@href').get().split('/')[-1].split('.')[0]
+        home_coach = s.xpath('//div[@class="scorebox"]/div[2]/descendant::strong[text()="Coach"]/following-sibling::a/@href').get().split('/')[-1].split('.')[0]
+        
+        # TODO: Most don't have descriptors, this logic might not hold for all pages
+        other_info = s.xpath('//div[@class="scorebox"]/div[@class="scorebox_meta"]/descendant::div')
+        raw_date = other_info.xpath('/div[1]/text()').get()
+        parsed_date = datetime.strptime(date_string, '%A %b %d, %Y').strftime('%Y-%m-%d')
+        game_id = f'{parsed_date}_{away_code}_{home_code}'
+        start_time = other_info.xpath('/div[2]/text()').get().strip(': ')
+        stadium = other_info.xpath('/div[3]/a/@href').get().split('/')[-1].split('.')[0]
+        attendance = other_info.xpath('/div[4]/a/text()').get()
+        game_length = other_info.xpath('/div[5]/text()').get().strip(': ')
+
+        yield MetaItem(
+            game_id=game_id,
+            home_team=home_name,
+            away_team=away_name,
+            home_coach=home_coach,
+            away_coach=away_coach,
+            raw_date=raw_date,
+            date=parsed_date,
+            start_time=start_time,
+            stadium=stadium,
+            attendance=attendance,
+            game_length=game_length,
+        )
 
     def activate_csvs(self, response):
         driver = response.meta['driver']
@@ -67,26 +114,10 @@ class GamesSpider(scrapy.Spider):
     
     def parse_csvs(self, response):
         driver = response.meta['driver']
-
         s = Selector(text=driver.page_source)
 
-        # Get scorebox info, team names
-        scorebox = s.xpath('//div[@class="scorebox"]')
-        away_div = s.xpath('//div[@class="scorebox"]/div[1]/descendant::strong/a')
-        home_div = s.xpath('//div[@class="scorebox"]/div[2]/descendant::strong/a')
-        away_code = away_div.xpath('@href').get().split('/')[1]
-        home_code = home_div.xpath('@href').get().split('/')[1]
-        away_full_name = away_div.xpath('text()').get()
-        home_full_name = home_div.xpath('text()').get()
-        away_name = away_full_name.split(' ')[-1]
-        home_name = home_full_name.split(' ')[-1]
-        away_coach = s.xpath('//div[@class="scorebox"]/div[1]/descendant::strong[text()="Coach"]/following-sibling::a/@href').get().split('/')[-1].split('.')[0]
-        home_coach = s.xpath('//div[@class="scorebox"]/div[2]/descendant::strong[text()="Coach"]/following-sibling::a/@href').get().split('/')[-1].split('.')[0]
-        # TODO: The date has no name, and the others just have <strong> tag before the text, this logic might
-        # not hold for all pages 
-        
-
         # Get non-CSV tables
+        # TODO: Add "Scoring" table too
         game_info_table = s.xpath("//td[text()='Game Info']/parent::tr/parent::thead/following-sibling::tbody")
         game_info_headers = game_info_table.xpath('.//th[@data-stat="info"]/text()').getall()
         game_info_values = game_info_table.xpath('.//td[@data-stat="stat"]/text()').getall()
@@ -99,8 +130,9 @@ class GamesSpider(scrapy.Spider):
         yield CsvFileItem(table_name='game_info', csv_content=[game_info_headers, game_info_values])
         yield CsvFileItem(table_name='officials', csv_content=[officials_headers, officials_names])
 
-
         table_names = s.xpath("//span[text()='Share & Export']/ancestor::div[@class='table_wrapper']/div/h2/text()").getall()
+        table_names = [i.replace(away_name, 'away').replace(home_name, 'home') for i in table_names]
+        table_names = [i.lower().replace(' ', '_') for i in table_names]
         csvs = s.xpath("//pre[starts-with(@id, 'csv')]")
         
         for table_name, csv in zip(table_names, csvs):

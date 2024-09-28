@@ -1,3 +1,5 @@
+from shutil import which
+
 # Scrapy settings for profootballreference project
 #
 # For simplicity, this file contains only settings considered important or
@@ -53,6 +55,9 @@ ROBOTSTXT_OBEY = True
 # DOWNLOADER_MIDDLEWARES = {
 #    'profootballreference.middlewares.ProfootballreferenceDownloaderMiddleware': 543,
 # }
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_selenium.SeleniumMiddleware': 800
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -90,3 +95,13 @@ ROBOTSTXT_OBEY = True
 # Set settings whose default value is deprecated to a future-proof value
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+
+# Selenium settings
+SELENIUM_DRIVER_NAME = 'chrome'
+SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromedriver')
+SELENIUM_DRIVER_ARGUMENTS = ['--headless']  # '--headless' if using chrome instead of firefox
+
+# Needed for CSV pipeline
+ITEM_PIPELINES = {
+    'profootballreference.pipelines.CsvPipeline': 300,
+}
