@@ -18,6 +18,12 @@ from datetime import datetime
 #   until I'm ready to be done with that page and then I can yield the item.
 #   This obviously uses more memory, but I'm not sure how else to do it.
 
+# Use this expression to get all of the comments: //div[@class='placeholder']/following-sibling::comment()
+#    Then create a new Selector with that text and extract the values.
+#    It would be cool to set it up to get the headers/row names automatically, just
+#    have to be careful about checking for formatting and when to get hrefs vs. text for links.
+#    There are also some places with text that includes formatting, like ": 5:00pm"
+
 class GamesSpider(scrapy.Spider):
     name = 'games'
     allowed_domains = ['www.pro-football-reference.com']
