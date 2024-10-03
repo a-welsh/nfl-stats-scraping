@@ -22,7 +22,7 @@ NEWSPIDER_MODULE = "profootballreference.spiders"
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -103,6 +103,6 @@ SELENIUM_DRIVER_ARGUMENTS = ['--headless']  # '--headless' if using chrome inste
 
 # Needed for CSV pipeline
 ITEM_PIPELINES = {
-    'profootballreference.pipelines.MetaPipeline': 300,
-    'profootballreference.pipelines.CsvFilePipeline': 400,
+    #'profootballreference.pipelines.MetaPipeline': 100,
+    'profootballreference.pipelines.CsvFilePipeline': 300,
 }

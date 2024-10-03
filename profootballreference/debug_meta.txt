@@ -1,0 +1,13 @@
+Processing item: {'attendance': '73,611',
+ 'away_coach': 'HarbJo0',
+ 'away_team': 'Ravens',
+ 'date': '2024-09-05',
+ 'game_id': '2024-09-05_teams_teams',
+ 'game_length': '3:10',
+ 'home_coach': 'ReidAn0',
+ 'home_team': 'Chiefs',
+ 'raw_date': 'Thursday Sep 5, 2024',
+ 'stadium': 'KAN00',
+ 'start_time': '8:20pm',
+ 'week': '1',
+ 'year': '2024'}

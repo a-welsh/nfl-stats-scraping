@@ -6,12 +6,12 @@
 import scrapy
 
 class CsvFileItem(scrapy.Item):
+    meta = scrapy.Field()
+    game_tables = scrapy.Field()
+    '''
     game_id = scrapy.Field()
-    table_name = scrapy.Field()
-    csv_content = scrapy.Field()
-
-class MetaItem(scrapy.Item):
-    game_id = scrapy.Field()
+    year = scrapy.Field()
+    week = scrapy.Field()
     home_team = scrapy.Field()
     away_team = scrapy.Field()
     home_coach = scrapy.Field()
@@ -22,6 +22,10 @@ class MetaItem(scrapy.Item):
     stadium = scrapy.Field()
     attendance = scrapy.Field()
     game_length = scrapy.Field()
+    '''
+
+class MetaItem(scrapy.Item):
+    pass
 
 class ProfootballreferenceItem(scrapy.Item):
     # define the fields for your item here like:
